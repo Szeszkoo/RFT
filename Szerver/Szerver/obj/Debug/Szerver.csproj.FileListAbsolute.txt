@@ -1,1 +1,7 @@
 D:\RFT\Szerver\Szerver\bin\Debug\Szerver.exe.config
+D:\GITHUB\RFT\Szerver\Szerver\bin\Debug\Szerver.exe.config
+D:\GITHUB\RFT\Szerver\Szerver\bin\Debug\Szerver.exe
+D:\GITHUB\RFT\Szerver\Szerver\bin\Debug\Szerver.pdb
+D:\GITHUB\RFT\Szerver\Szerver\obj\Debug\Szerver.csprojResolveAssemblyReference.cache
+D:\GITHUB\RFT\Szerver\Szerver\obj\Debug\Szerver.exe
+D:\GITHUB\RFT\Szerver\Szerver\obj\Debug\Szerver.pdb

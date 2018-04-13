@@ -38,6 +38,16 @@ namespace Szerver
                     switch (parancs)
                     {
                         //függvények érkeznek majd ide
+                        case "HELP":
+                            {
+                                Help();
+                            }
+                            break;
+                        case "LIST":
+                            {
+                                Lista();
+                            }
+                            break;
                         case "BYE": w.WriteLine("BYE"); ok = false; break;
                         default: w.WriteLine("ERR|Ismeretlen parancs"); break;
                     }
@@ -50,8 +60,26 @@ namespace Szerver
             }
             Console.WriteLine("A kliens elköszönt");
         }
+        private void Help()
+        {
+            w.WriteLine("OK*");
+            w.WriteLine("HELP:                       Ki listázza a megadható parancsokat");
+            w.WriteLine("LIST :                      Ki listázza a motorokat");
+            w.WriteLine("EXIT:                       Kilépés");
+            w.WriteLine("OK!");
+        }
+        void Lista()
+        {
+            string[] listam = File.ReadAllLines("lista.txt");
+            w.WriteLine("OK*");
+            foreach (var item in listam)
+            {
+                listam = listam[0].Split('|');
+                w.WriteLine(item);
+            }
+            w.WriteLine("OK!");
+        }
     }
-
 
     class Program
     {
