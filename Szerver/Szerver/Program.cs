@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Szerver
 {
+   
     class Protokoll
     {
         public StreamReader r;
@@ -24,7 +25,7 @@ namespace Szerver
 
         public void StartKomm()
         {
-            w.WriteLine("Akció 1.0 béta");
+            w.WriteLine("Aukció 1.0 béta");
             w.Flush();
             bool ok = true;
             while (ok)
@@ -38,6 +39,8 @@ namespace Szerver
                     switch (parancs)
                     {
                         //függvények érkeznek majd ide
+                        case "LOGIN": Login(param[1],param[2]);break;
+                        case "LOGOUT":Logout();break;
                         case "HELP":
                             {
                                 Help();
@@ -60,12 +63,39 @@ namespace Szerver
             }
             Console.WriteLine("A kliens elköszönt");
         }
+        public void Login(string nev, string jelszo)
+        {
+            if (this.user != null)
+            {
+                w.WriteLine("Előbb jelentkezzen ki!");
+            }
+            else
+            {
+                this.user = nev;
+                w.WriteLine("OK");
+
+            }
+        }
+        public void Logout()
+        {
+            if (this.user == null)
+            {
+                w.WriteLine("Nincs bejelentkezve senki!");
+            }
+            else
+            {
+                this.user = null;
+                w.WriteLine("Sikeres kijelentkezés!");
+            }
+        }
         private void Help()
         {
             w.WriteLine("OK*");
-            w.WriteLine("HELP:                       Ki listázza a megadható parancsokat");
-            w.WriteLine("LIST :                      Ki listázza a motorokat");
-            w.WriteLine("EXIT:                       Kilépés");
+            w.WriteLine("LOGIN:                      Bejelentkezés felhasználónév|jelszó formátummal!");
+            w.WriteLine("LOGOUT:                     Jelenleg bejelentkezett felhasználó kijelentkeztetése!");
+            w.WriteLine("HELP:                       Ki listázza a megadható parancsokat!");
+            w.WriteLine("LIST :                      Ki listázza a motorokat!");
+            w.WriteLine("EXIT:                       Kilépés!");
             w.WriteLine("OK!");
         }
         void Lista()
