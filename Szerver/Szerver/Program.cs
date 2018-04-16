@@ -10,11 +10,13 @@ using System.Threading.Tasks;
 
 namespace Szerver
 {
-   
+
     class Protokoll
     {
         public StreamReader r;
         public StreamWriter w;
+        public StreamWriter w2;
+
         public string user = null;
 
         public Protokoll(TcpClient c)
@@ -39,8 +41,23 @@ namespace Szerver
                     switch (parancs)
                     {
                         //függvények érkeznek majd ide
-                        case "LOGIN": Login(param[1],param[2]);break;
-                        case "LOGOUT":Logout();break;
+                        case "LOGIN":
+                            {
+                                Login(param[1], param[2]);
+                                break;
+                            }
+                        case "LOGOUT": Logout(); break;
+                        case "REGISTER":
+                            {
+                                if (Register(param[1], param[2]) == true)
+                                {
+                                    w2 = new StreamWriter("../../users.txt", true);
+                                    w2.WriteLine("{0}|{1}", param[1], param[2]);
+                                    w2.Flush();
+                                    w2.Close();
+                                }
+                                break;
+                            }
                         case "HELP":
                             {
                                 Help();
@@ -62,6 +79,41 @@ namespace Szerver
                 w.Flush();
             }
             Console.WriteLine("A kliens elköszönt");
+        }
+        public bool Register(string nev, string jelszo)
+        {
+            StreamReader r2 = new StreamReader("../../users.txt");
+            if (this.user != null)
+            {
+                w.WriteLine("Előbb jelentkezz be vagy regisztrálj a REGISTER paranccsal!");
+                return false;
+            }
+            else
+            {
+                List<string> lines = new List<string>();
+                string[] paramS;
+                while (!r2.EndOfStream)
+                {
+                    lines.Add(r2.ReadLine());
+                }
+                foreach (var z in lines)
+                {
+                    paramS = z.Split('|');
+                    if (nev == paramS[0])
+                    {
+                        w.WriteLine("Ez a felhasználó már regiszrálva van.");
+                        return false;
+                    }
+                    else
+                    {
+                        w.WriteLine("OK");
+                        return true;
+                    }
+                }
+                r2.Close();
+                return true;
+              
+            }
         }
         public void Login(string nev, string jelszo)
         {

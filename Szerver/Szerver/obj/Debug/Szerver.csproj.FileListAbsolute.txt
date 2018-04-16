@@ -7,3 +7,6 @@ D:\GITHUB\RFT\Szerver\Szerver\obj\Debug\Szerver.exe
 D:\GITHUB\RFT\Szerver\Szerver\obj\Debug\Szerver.pdb
 D:\RFT\Szerver\Szerver\obj\Debug\Szerver.exe
 D:\RFT\Szerver\Szerver\obj\Debug\Szerver.pdb
+D:\RFT\Szerver\Szerver\bin\Debug\Szerver.exe
+D:\RFT\Szerver\Szerver\bin\Debug\Szerver.pdb
+D:\RFT\Szerver\Szerver\obj\Debug\Szerver.csprojResolveAssemblyReference.cache
