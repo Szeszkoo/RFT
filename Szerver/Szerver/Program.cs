@@ -18,6 +18,7 @@ namespace Szerver
         public StreamWriter w2;
 
         public string user = null;
+        public bool admin = false;
 
         public Protokoll(TcpClient c)
         {
@@ -80,39 +81,41 @@ namespace Szerver
             }
             Console.WriteLine("A kliens elköszönt");
         }
+
         public bool Register(string nev, string jelszo)
         {
-            StreamReader r2 = new StreamReader("../../users.txt");
+            string[] paramS;
+            string line;
+            int i = 1;
+            int lineCount = File.ReadLines("../../users.txt").Count();
+            while (i <= lineCount)
+            {
+                line = File.ReadLines("../../users.txt").Skip(i-1).Take(1).First();
+                paramS = line.Split('|');
+                if (nev == paramS[0])
+                {
+                    w.WriteLine("Ilyen felhasználónév már létezik, próbáld újra!"); // ezt valamiért nem írja ki, de ettől még működik
+                    return false;
+                }
+                i++;
+            }
+            w.WriteLine("OK");
+            return true;
+        }
+
+        public void UserDelete(string nev)
+        {
             if (this.user != null)
             {
-                w.WriteLine("Előbb jelentkezz be vagy regisztrálj a REGISTER paranccsal!");
-                return false;
+                w.WriteLine("Előbb jelentkezz be!");
+            }
+            else if (admin != true)
+            {
+                w.WriteLine("Nincs jogosultságod ehhez!");
             }
             else
             {
-                List<string> lines = new List<string>();
-                string[] paramS;
-                while (!r2.EndOfStream)
-                {
-                    lines.Add(r2.ReadLine());
-                }
-                foreach (var z in lines)
-                {
-                    paramS = z.Split('|');
-                    if (nev == paramS[0])
-                    {
-                        w.WriteLine("Ez a felhasználó már regiszrálva van.");
-                        return false;
-                    }
-                    else
-                    {
-                        w.WriteLine("OK");
-                        return true;
-                    }
-                }
-                r2.Close();
-                return true;
-              
+                //törlés
             }
         }
         public void Login(string nev, string jelszo)
@@ -121,11 +124,16 @@ namespace Szerver
             {
                 w.WriteLine("Előbb jelentkezzen ki!");
             }
+            else if (nev == "admin")
+            {
+                admin = true;
+                this.user = nev;
+                w.WriteLine("OK-admin");
+            }
             else
             {
                 this.user = nev;
                 w.WriteLine("OK");
-
             }
         }
         public void Logout()
