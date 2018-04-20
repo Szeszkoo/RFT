@@ -4,3 +4,7 @@ D:\GITHUB\RFT\Kliens\Kliens\bin\Debug\Kliens.exe
 D:\GITHUB\RFT\Kliens\Kliens\bin\Debug\Kliens.pdb
 D:\GITHUB\RFT\Kliens\Kliens\obj\Debug\Kliens.exe
 D:\GITHUB\RFT\Kliens\Kliens\obj\Debug\Kliens.pdb
+D:\RFT\Kliens\Kliens\obj\Debug\Kliens.exe
+D:\RFT\Kliens\Kliens\obj\Debug\Kliens.pdb
+D:\RFT\Kliens\Kliens\bin\Debug\Kliens.exe
+D:\RFT\Kliens\Kliens\bin\Debug\Kliens.pdb

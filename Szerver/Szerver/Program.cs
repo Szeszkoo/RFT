@@ -59,6 +59,11 @@ namespace Szerver
                                 }
                                 break;
                             }
+                        case "USERDEL":
+                            {
+                                UserDelete(param[1]);
+                                break;
+                            }
                         case "HELP":
                             {
                                 Help();
@@ -90,7 +95,7 @@ namespace Szerver
             int lineCount = File.ReadLines("../../users.txt").Count();
             while (i <= lineCount)
             {
-                line = File.ReadLines("../../users.txt").Skip(i-1).Take(1).First();
+                line = File.ReadLines("../../users.txt").Skip(i - 1).Take(1).First();
                 paramS = line.Split('|');
                 if (nev == paramS[0])
                 {
@@ -103,19 +108,42 @@ namespace Szerver
             return true;
         }
 
-        public void UserDelete(string nev)
+        public bool UserDelete(string nev)
         {
-            if (this.user != null)
+            if (this.user == null)
             {
                 w.WriteLine("Előbb jelentkezz be!");
+                return false;
             }
-            else if (admin != true)
+            else if (admin == true)
             {
                 w.WriteLine("Nincs jogosultságod ehhez!");
+                return false;
             }
             else
             {
-                //törlés
+                string[] paramS;
+                string line = null;
+                int i = 1;
+                int lineCount = File.ReadLines("../../users.txt").Count();
+                while (i <= lineCount)
+                {
+
+                    line = File.ReadLines("../../users.txt").Skip(i - 1).Take(1).First();
+                    paramS = line.Split('|');
+                    if (nev == paramS[0])
+                    {
+                        w2 = new StreamWriter("../../users.txt", true);
+                        w2.WriteLine(Environment.NewLine); // itt egyenlőre mutyi van xd
+                        w2.Flush();
+                        w2.Close();
+                        w.WriteLine("OK");
+                        return true;
+                    }
+                    i++;
+                }
+                w.WriteLine("Ilyen felhasználó nem létezik!");
+                return false;
             }
         }
         public void Login(string nev, string jelszo)
@@ -128,7 +156,7 @@ namespace Szerver
             {
                 admin = true;
                 this.user = nev;
-                w.WriteLine("OK-admin");
+                w.WriteLine("OK");
             }
             else
             {
@@ -153,6 +181,8 @@ namespace Szerver
             w.WriteLine("OK*");
             w.WriteLine("LOGIN:                      Bejelentkezés felhasználónév|jelszó formátummal!");
             w.WriteLine("LOGOUT:                     Jelenleg bejelentkezett felhasználó kijelentkeztetése!");
+            w.WriteLine("REGISTER:                   Rgisztráció!");
+            w.WriteLine("USERDEL:                    Felhasználók törlése.(ADMIN ONLY");
             w.WriteLine("HELP:                       Ki listázza a megadható parancsokat!");
             w.WriteLine("LIST :                      Ki listázza a motorokat!");
             w.WriteLine("EXIT:                       Kilépés!");
