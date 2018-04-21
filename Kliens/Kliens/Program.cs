@@ -19,7 +19,7 @@ namespace Kliens
             string udv = "";
             try
             {
-                string ipcim = "127.0.0.1"; int portszam = 54325;
+                string ipcim = "127.0.0.1"; int portszam = 1234;
                 IPAddress ip = IPAddress.Parse(ipcim);
                 csatl = new TcpClient(ipcim, portszam);
                 r = new StreamReader(csatl.GetStream());
@@ -47,17 +47,17 @@ namespace Kliens
                 {
                     Console.WriteLine(valasz);
                 }
-                else
+                else if (valasz == "OK*")
                 {
-                    if (valasz == "OK*")
+                    while (valasz != "OK!")
                     {
-                        while (valasz != "OK!")
-                        {
-                            valasz = r.ReadLine();
-                            Console.WriteLine(valasz);
-                        }
+                        valasz = r.ReadLine();
+                        Console.WriteLine(valasz);
                     }
                 }
+
+                else
+                    Console.WriteLine(valasz);
             }
         }
     }

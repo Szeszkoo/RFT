@@ -16,14 +16,15 @@ namespace Szerver
         public StreamReader r;
         public StreamWriter w;
         public StreamWriter w2;
-
+        TcpClient client = null;
         public string user = null;
         public bool admin = false;
 
         public Protokoll(TcpClient c)
         {
-            this.r = new StreamReader(c.GetStream(), Encoding.UTF8);
-            this.w = new StreamWriter(c.GetStream(), Encoding.UTF8);
+            this.client = c;
+            r = new StreamReader(c.GetStream(), Encoding.UTF8);
+            w = new StreamWriter(c.GetStream(), Encoding.UTF8);
         }
 
         public void StartKomm()
@@ -61,9 +62,25 @@ namespace Szerver
                             }
                         case "USERDEL":
                             {
-                                UserDelete(param[1]);
-                                break;
+                                if (admin == true)
+                                    UserDelete(param[1]);
+                                else
+                                {
+                                    w.WriteLine("Te nem adhatsz hozzá nem vagy admin");
+                                }
+
                             }
+                            break;
+                        case "USERLIST":
+                            {
+                                if (admin == true)
+                                    userLista();
+                                else
+                                {
+                                    w.WriteLine("Te nem kérheted le ezt nem vagy admin");
+                                }
+                            }
+                            break;
                         case "HELP":
                             {
                                 Help();
@@ -107,45 +124,77 @@ namespace Szerver
             w.WriteLine("OK");
             return true;
         }
+        #region earlierUserdel
+        //public bool UserDelete(string nev)
+        //{
+        //if (this.user == null)
+        //{
+        //    w.WriteLine("Előbb jelentkezz be!");
+        //    return false;
+        //}
+        //else if (admin == false)
+        //{
+        //    w.WriteLine("Nincs jogosultságod ehhez!");
+        //    return false;
+        //}
+        //else
+        //{
+        //    string[] paramS;
+        //    string line = null;
+        //    int i = 1;
+        //    int lineCount = File.ReadLines("../../users.txt").Count();
+        //    while (i <= lineCount)
+        //    {
 
-        public bool UserDelete(string nev)
+        //        line = File.ReadLines("../../users.txt").Skip(i - 1).Take(1).First();
+        //        paramS = line.Split('|');
+        //        if (nev == paramS[0])
+        //        {
+        //            w2 = new StreamWriter("../../users.txt", true);
+        //            w2.WriteLine(Environment.NewLine); // itt egyenlőre mutyi van xd
+        //            w2.Flush();
+        //            w2.Close();
+        //            w.WriteLine("OK");
+        //            return true;
+        //        }
+        //        i++;
+        //    }
+        //    w.WriteLine("Ilyen felhasználó nem létezik!");
+        //    return false;
+        //}
+        //}
+        #endregion
+        private void UserDelete(string nev)
         {
-            if (this.user == null)
-            {
-                w.WriteLine("Előbb jelentkezz be!");
-                return false;
-            }
-            else if (admin == true)
-            {
-                w.WriteLine("Nincs jogosultságod ehhez!");
-                return false;
-            }
-            else
-            {
-                string[] paramS;
-                string line = null;
-                int i = 1;
-                int lineCount = File.ReadLines("../../users.txt").Count();
-                while (i <= lineCount)
-                {
 
-                    line = File.ReadLines("../../users.txt").Skip(i - 1).Take(1).First();
-                    paramS = line.Split('|');
-                    if (nev == paramS[0])
-                    {
-                        w2 = new StreamWriter("../../users.txt", true);
-                        w2.WriteLine(Environment.NewLine); // itt egyenlőre mutyi van xd
-                        w2.Flush();
-                        w2.Close();
-                        w.WriteLine("OK");
-                        return true;
-                    }
-                    i++;
-                }
-                w.WriteLine("Ilyen felhasználó nem létezik!");
-                return false;
+            string FilePath = "../../users.txt";
+            var text = new StringBuilder();
+            foreach (string s in File.ReadAllLines(FilePath))
+            {
+                text.AppendLine(s.Replace(nev, " "));
             }
+            w.WriteLine("OK");
+
+            using (var file = new StreamWriter(File.Create(FilePath)))
+            {
+                file.Write(text.ToString());
+            }
+
         }
+        void userLista()
+        {
+
+            string[] listam = File.ReadAllLines("../../users.txt");
+            w.WriteLine("OK*");
+            foreach (var item in listam)
+            {
+                listam = listam[0].Split('|');
+                w.WriteLine(item);
+            }
+            w.WriteLine("OK!");
+
+        }
+
         public void Login(string nev, string jelszo)
         {
             if (this.user != null)
@@ -156,7 +205,7 @@ namespace Szerver
             {
                 admin = true;
                 this.user = nev;
-                w.WriteLine("OK");
+                w.WriteLine("Üdvözlünk a kormánynál,admin");
             }
             else
             {
@@ -169,6 +218,12 @@ namespace Szerver
             if (this.user == null)
             {
                 w.WriteLine("Nincs bejelentkezve senki!");
+            }
+            if (user == "admin")
+            {
+                admin = false;
+                this.user = null;
+                w.WriteLine("Sikeres kijelentkezés,adminom!");
             }
             else
             {
@@ -203,7 +258,7 @@ namespace Szerver
 
     class Program
     {
-        const int portSzam = 54325;
+        const int portSzam = 1234;
         const string ipcim = "127.0.0.1";
 
         static void Main(string[] args)
