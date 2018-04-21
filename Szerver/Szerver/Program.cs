@@ -19,6 +19,7 @@ namespace Szerver
         TcpClient client = null;
         public string user = null;
         public bool admin = false;
+        List<string> online = new List<string>();
 
         public Protokoll(TcpClient c)
         {
@@ -63,7 +64,7 @@ namespace Szerver
                         case "USERDEL":
                             {
                                 if (admin == true)
-                                    UserDelete(param[1]);
+                                    UserDelete(param[1], param[2]);
                                 else
                                 {
                                     w.WriteLine("Te nem adhatsz hozzá nem vagy admin");
@@ -81,6 +82,11 @@ namespace Szerver
                                 }
                             }
                             break;
+                        //case "ONLINE":
+                        //    {
+                        //        onlineUserek();
+                        //    }
+                        //    break;
                         case "HELP":
                             {
                                 Help();
@@ -116,7 +122,7 @@ namespace Szerver
                 paramS = line.Split('|');
                 if (nev == paramS[0])
                 {
-                    w.WriteLine("Ilyen felhasználónév már létezik, próbáld újra!"); // ezt valamiért nem írja ki, de ettől még működik
+                    w.WriteLine("Ilyen felhasználónév már létezik, próbáld újra!"); 
                     return false;
                 }
                 i++;
@@ -164,14 +170,14 @@ namespace Szerver
         //}
         //}
         #endregion
-        private void UserDelete(string nev)
+        private void UserDelete(string nev, string jelszo)
         {
-
             string FilePath = "../../users.txt";
             var text = new StringBuilder();
+            
             foreach (string s in File.ReadAllLines(FilePath))
             {
-                text.AppendLine(s.Replace(nev, " "));
+                text.AppendLine(s.Replace(nev + "|" + jelszo, ""));
             }
             w.WriteLine("OK");
 
@@ -183,7 +189,6 @@ namespace Szerver
         }
         void userLista()
         {
-
             string[] listam = File.ReadAllLines("../../users.txt");
             w.WriteLine("OK*");
             foreach (var item in listam)
@@ -194,6 +199,15 @@ namespace Szerver
             w.WriteLine("OK!");
 
         }
+        //void onlineUserek()
+        //{
+        //    w.WriteLine("OK*");
+        //    foreach (var item in online)
+        //    {
+        //        w.WriteLine("online: " + item);
+        //    }
+        //    w.WriteLine("OK!");
+        //}
 
         public void Login(string nev, string jelszo)
         {
@@ -209,6 +223,7 @@ namespace Szerver
             }
             else
             {
+                //online.Add(nev);
                 this.user = nev;
                 w.WriteLine("OK");
             }
@@ -236,8 +251,9 @@ namespace Szerver
             w.WriteLine("OK*");
             w.WriteLine("LOGIN:                      Bejelentkezés felhasználónév|jelszó formátummal!");
             w.WriteLine("LOGOUT:                     Jelenleg bejelentkezett felhasználó kijelentkeztetése!");
-            w.WriteLine("REGISTER:                   Rgisztráció!");
-            w.WriteLine("USERDEL:                    Felhasználók törlése.(ADMIN ONLY");
+            w.WriteLine("REGISTER:                   Rgisztráció felhasználónév|jelszó formátummal!");
+            w.WriteLine("USERDEL:                    Felhasználók törlése felhasználónév|jelszó formátummal!(ADMIN ONLY");
+            w.WriteLine("USERLIST:                   Ki listázza a felhasználókat!(ADMIN ONLY");
             w.WriteLine("HELP:                       Ki listázza a megadható parancsokat!");
             w.WriteLine("LIST :                      Ki listázza a motorokat!");
             w.WriteLine("EXIT:                       Kilépés!");
@@ -274,7 +290,7 @@ namespace Szerver
                 {
                     Console.WriteLine("A szerver bejövő kapcsolatra vár");
                     TcpClient client = k.AcceptTcpClient();
-                    Console.WriteLine("Valaki jött, akar vmit!");
+                    Console.WriteLine("Érkezett egy kliens!");
                     Protokoll p = new Protokoll(client);
                     Thread t = new Thread(p.StartKomm);
                     t.Start();
