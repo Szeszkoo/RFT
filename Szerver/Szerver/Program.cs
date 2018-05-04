@@ -78,7 +78,7 @@ namespace Szerver
         public Users(string username, int osszeg)
         {
             this.username = username;
-            this.osszeg = osszeg;
+           // this.osszeg = osszeg;
         }
     }
     class Szamla
@@ -126,7 +126,7 @@ namespace Szerver
             r = new StreamReader(c.GetStream(), Encoding.UTF8);
             w = new StreamWriter(c.GetStream(), Encoding.UTF8);
         }
-        public void BankRead()
+        public void Read_users()
         {
             StreamReader reader = new StreamReader("../../users.txt");
             while (reader.Peek() >= 0)
@@ -140,9 +140,9 @@ namespace Szerver
             }
             reader.Close();
         }
-        public void BankWrite()
+        public void Overwrite_users() //felülírja az adott sort csak a pénz változtatva
         {
-            BankRead();
+            Read_users();
             int i = 1;
             int lineCount = File.ReadLines("../../users.txt").Count();
             string line;
@@ -158,9 +158,7 @@ namespace Szerver
                     lines[i] = banklist[i].Username + "|" + banklist[i].Password + "|" + banklist[i].Money;
                     File.WriteAllLines("../../users.txt", lines);
                 }
-
                 i++;
-
             }
             w.WriteLine("OK");
 
@@ -223,13 +221,13 @@ namespace Szerver
                         case "DEPOSIT":
                             {
                                 Deposit(int.Parse(param[1]));
-                                BankWrite();
+                                Overwrite_users();
                                 break;
                             }
                         case "WITHDRAW":
                             {
                                 Withdraw(int.Parse(param[1]));
-                                BankWrite();
+                                Overwrite_users();
                                 break;
                             }
                         case "BALANCE": Balance(); break;
@@ -281,7 +279,7 @@ namespace Szerver
             }
             else
             {
-                BankRead();
+                Read_users();
                 w.WriteLine("OK*");
                 foreach (var z in banklist)
                 {
@@ -301,7 +299,7 @@ namespace Szerver
             }
             else
             {
-                BankRead();
+                Read_users();
                 w.WriteLine("OK*");
                 foreach (var z in banklist)
                 {
@@ -322,7 +320,7 @@ namespace Szerver
             }
             else
             {
-                BankRead();
+                Read_users();
                 //w.WriteLine("OK*");
                 foreach (var z in banklist)
                 {
@@ -353,7 +351,7 @@ namespace Szerver
                 //text.AppendLine(s.Remove(6, 11));
             }
                 szemely.Username = felhasznalonak;
-                szemely.Osszeg = osszeg;
+              //  szemely.Osszeg = osszeg;
                 Felhasznaloklista.Add(szemely);
             w.WriteLine("OK");
 
@@ -365,15 +363,12 @@ namespace Szerver
 
         public bool Register(string nev, string jelszo)
         {
-            string[] paramS;
-            string line;
+            Read_users();
             int i = 1;
             int lineCount = File.ReadLines("../../users.txt").Count();
             while (i <= lineCount)
             {
-                line = File.ReadLines("../../users.txt").Skip(i - 1).Take(1).First();
-                paramS = line.Split('|');
-                if (nev == paramS[0])
+                if (banklist[i].Username == nev)
                 {
                     w.WriteLine("Ilyen felhasználónév már létezik, próbáld újra!");
                     return false;
@@ -382,6 +377,25 @@ namespace Szerver
             }
             w.WriteLine("OK");
             return true;
+            #region old_register
+            /* string[] paramS;
+             string line;
+             int i = 1;
+             int lineCount = File.ReadLines("../../users.txt").Count();
+             while (i <= lineCount)
+             {
+                 line = File.ReadLines("../../users.txt").Skip(i - 1).Take(1).First();
+                 paramS = line.Split('|');
+                 if (nev == paramS[0])
+                 {
+                     w.WriteLine("Ilyen felhasználónév már létezik, próbáld újra!");
+                     return false;
+                 }
+                 i++;
+             }
+             w.WriteLine("OK");
+             return true;*/
+            #endregion
         }
         #region earlierUserdel
         //public bool UserDelete(string nev)
