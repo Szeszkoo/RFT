@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Szerver
 {
-<<<<<<< HEAD
+
     class Bank
     {
         string username, password;
@@ -53,9 +53,11 @@ namespace Szerver
             {
                 money = value;
             }
-=======
+        }
+    }
     class Users
     {
+        private string username;
         private string jelszo;
 
         public string Jelszo
@@ -63,7 +65,6 @@ namespace Szerver
             get { return jelszo; }
             set { jelszo = value; }
         }
-        private string username;
 
         public string Username
         {
@@ -104,7 +105,7 @@ namespace Szerver
         {
             this.fioknev = fiokneve;
             this.osszeg = osszeg;
->>>>>>> cdcd49e18879d8785b1877ce40fa6a81619a469f
+
         }
     }
     class Protokoll
@@ -116,12 +117,8 @@ namespace Szerver
         public string user = null;
         public bool admin = false;
         List<string> online = new List<string>();
-<<<<<<< HEAD
         public List<Bank> banklist = new List<Bank>();
-        byte rowcounter = 0;
-=======
         List<Users> Felhasznaloklista = new List<Users>();
->>>>>>> cdcd49e18879d8785b1877ce40fa6a81619a469f
 
         public Protokoll(TcpClient c)
         {
@@ -223,7 +220,6 @@ namespace Szerver
                                 }
                             }
                             break;
-<<<<<<< HEAD
                         case "DEPOSIT":
                             {
                                 Deposit(int.Parse(param[1]));
@@ -238,7 +234,6 @@ namespace Szerver
                             }
                         case "BALANCE": Balance(); break;
 
-=======
                         case "UTAL":
                             {
                                 utal(param[1], int.Parse(param[2]));
@@ -249,7 +244,6 @@ namespace Szerver
                                 Szamla();
                             }
                             break;
->>>>>>> cdcd49e18879d8785b1877ce40fa6a81619a469f
                         //case "ONLINE":
                         //    {
                         //        onlineUserek();
@@ -279,7 +273,6 @@ namespace Szerver
             Console.WriteLine("A kliens elköszönt");
         }
 
-<<<<<<< HEAD
         public void Deposit(int amount)
         {
             if (this.user == null)
@@ -341,7 +334,6 @@ namespace Szerver
                 //w.WriteLine("OK!");
             }
         }
-=======
         public void utal(string felhasznalonak, int osszeg)
         {
             string FilePath = "../../szamla.txt";
@@ -371,7 +363,6 @@ namespace Szerver
             }
         }
 
->>>>>>> cdcd49e18879d8785b1877ce40fa6a81619a469f
         public bool Register(string nev, string jelszo)
         {
             string[] paramS;
