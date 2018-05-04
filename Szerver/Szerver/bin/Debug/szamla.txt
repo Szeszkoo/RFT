@@ -1,0 +1,4 @@
+dani|5000
+david|7500
+tomi|2200
+sanyi|1400

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Szerver
 {
+<<<<<<< HEAD
     class Bank
     {
         string username, password;
@@ -52,6 +53,58 @@ namespace Szerver
             {
                 money = value;
             }
+=======
+    class Users
+    {
+        private string jelszo;
+
+        public string Jelszo
+        {
+            get { return jelszo; }
+            set { jelszo = value; }
+        }
+        private string username;
+
+        public string Username
+        {
+            get { return username; }
+            set { username = value; }
+        }
+        public Users()
+        {
+
+        }
+        public Users(string username, int osszeg)
+        {
+            this.username = username;
+            this.osszeg = osszeg;
+        }
+    }
+    class Szamla
+    {
+        private int osszeg;
+
+        public int Osszeg
+        {
+            get { return osszeg; }
+            set { osszeg = value; }
+        }
+        private string fioknev;
+
+        public string Fioknev
+        {
+            get { return fioknev; }
+            set { fioknev = value; }
+        }
+        public Szamla()
+        {
+
+        }
+        public Szamla(string fiokneve, int osszeg)
+        {
+            this.fioknev = fiokneve;
+            this.osszeg = osszeg;
+>>>>>>> cdcd49e18879d8785b1877ce40fa6a81619a469f
         }
     }
     class Protokoll
@@ -63,8 +116,12 @@ namespace Szerver
         public string user = null;
         public bool admin = false;
         List<string> online = new List<string>();
+<<<<<<< HEAD
         public List<Bank> banklist = new List<Bank>();
         byte rowcounter = 0;
+=======
+        List<Users> Felhasznaloklista = new List<Users>();
+>>>>>>> cdcd49e18879d8785b1877ce40fa6a81619a469f
 
         public Protokoll(TcpClient c)
         {
@@ -166,6 +223,7 @@ namespace Szerver
                                 }
                             }
                             break;
+<<<<<<< HEAD
                         case "DEPOSIT":
                             {
                                 Deposit(int.Parse(param[1]));
@@ -180,11 +238,24 @@ namespace Szerver
                             }
                         case "BALANCE": Balance(); break;
 
+=======
+                        case "UTAL":
+                            {
+                                utal(param[1], int.Parse(param[2]));
+                            }
+                            break;
+                        case "SZAMLA":
+                            {
+                                Szamla();
+                            }
+                            break;
+>>>>>>> cdcd49e18879d8785b1877ce40fa6a81619a469f
                         //case "ONLINE":
                         //    {
                         //        onlineUserek();
                         //    }
                         //    break;
+
                         case "HELP":
                             {
                                 Help();
@@ -208,6 +279,7 @@ namespace Szerver
             Console.WriteLine("A kliens elköszönt");
         }
 
+<<<<<<< HEAD
         public void Deposit(int amount)
         {
             if (this.user == null)
@@ -269,6 +341,37 @@ namespace Szerver
                 //w.WriteLine("OK!");
             }
         }
+=======
+        public void utal(string felhasznalonak, int osszeg)
+        {
+            string FilePath = "../../szamla.txt";
+            var text = new StringBuilder();
+            Users szemely = new Users();
+            //szemely.Username = "gealo";
+            //szemely.Osszeg = 1300;
+            //foreach (var item in Felhasznaloklista)
+            //{
+            //    w.WriteLine(item);
+            //}
+            w.WriteLine(Felhasznaloklista);
+            foreach (string s in File.ReadAllLines(FilePath))
+            {
+                //text.AppendLine(s.Replace(felhasznalonak + "|", felhasznalonak + "|" + osszeg)); //Convert.ToString(osszeg)));
+
+                //text.AppendLine(s.Remove(6, 11));
+            }
+                szemely.Username = felhasznalonak;
+                szemely.Osszeg = osszeg;
+                Felhasznaloklista.Add(szemely);
+            w.WriteLine("OK");
+
+            using (var file = new StreamWriter(File.Create(FilePath)))
+            {
+                file.Write(text.ToString());
+            }
+        }
+
+>>>>>>> cdcd49e18879d8785b1877ce40fa6a81619a469f
         public bool Register(string nev, string jelszo)
         {
             string[] paramS;
@@ -357,6 +460,17 @@ namespace Szerver
             }
             w.WriteLine("OK!");
 
+        }
+        void Szamla()
+        {
+            string[] listam = File.ReadAllLines("../../szamla.txt");
+            w.WriteLine("OK*");
+            foreach (var item in listam)
+            {
+                listam = listam[0].Split('|');
+                w.WriteLine(item);
+            }
+            w.WriteLine("OK!");
         }
         //void onlineUserek()
         //{
