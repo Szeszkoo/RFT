@@ -10,7 +10,50 @@ using System.Threading.Tasks;
 
 namespace Szerver
 {
+    class Bank
+    {
+        string username, password;
+        int money;
 
+        public string Username
+        {
+            get
+            {
+                return username;
+            }
+
+            set
+            {
+                username = value;
+            }
+        }
+
+        public string Password
+        {
+            get
+            {
+                return password;
+            }
+
+            set
+            {
+                password = value;
+            }
+        }
+
+        public int Money
+        {
+            get
+            {
+                return money;
+            }
+
+            set
+            {
+                money = value;
+            }
+        }
+    }
     class Protokoll
     {
         public StreamReader r;
@@ -20,12 +63,53 @@ namespace Szerver
         public string user = null;
         public bool admin = false;
         List<string> online = new List<string>();
+        public List<Bank> banklist = new List<Bank>();
+        byte rowcounter = 0;
 
         public Protokoll(TcpClient c)
         {
             this.client = c;
             r = new StreamReader(c.GetStream(), Encoding.UTF8);
             w = new StreamWriter(c.GetStream(), Encoding.UTF8);
+        }
+        public void BankRead()
+        {
+            StreamReader reader = new StreamReader("../../users.txt");
+            while (reader.Peek() >= 0)
+            {
+                Bank m = new Bank();
+                string[] tmp = reader.ReadLine().Split('|');
+                m.Username = tmp[0];
+                m.Password = tmp[1];
+                m.Money = int.Parse(tmp[2]);
+                banklist.Add(m);
+            }
+            reader.Close();
+        }
+        public void BankWrite()
+        {
+            BankRead();
+            int i = 1;
+            int lineCount = File.ReadLines("../../users.txt").Count();
+            string line;
+            string[] paramS;
+            string[] lines = File.ReadAllLines("../../users.txt");
+            while (i <= lineCount)
+            {
+                line = File.ReadLines("../../users.txt").Skip(i).Take(1).First();
+                paramS = line.Split('|');
+
+                if (this.user == paramS[0] && banklist[i].Username == paramS[0])
+                {
+                    lines[i] = banklist[i].Username + "|" + banklist[i].Password + "|" + banklist[i].Money;
+                    File.WriteAllLines("../../users.txt", lines);
+                }
+
+                i++;
+
+            }
+            w.WriteLine("OK");
+
         }
 
         public void StartKomm()
@@ -55,7 +139,7 @@ namespace Szerver
                                 if (Register(param[1], param[2]) == true)
                                 {
                                     w2 = new StreamWriter("../../users.txt", true);
-                                    w2.WriteLine("{0}|{1}", param[1], param[2]);
+                                    w2.WriteLine("{0}|{1}|0", param[1], param[2]);
                                     w2.Flush();
                                     w2.Close();
                                 }
@@ -75,13 +159,27 @@ namespace Szerver
                         case "USERLIST":
                             {
                                 if (admin == true)
-                                    userLista();
+                                    UserList();
                                 else
                                 {
                                     w.WriteLine("Te nem kérheted le ezt nem vagy admin");
                                 }
                             }
                             break;
+                        case "DEPOSIT":
+                            {
+                                Deposit(int.Parse(param[1]));
+                                BankWrite();
+                                break;
+                            }
+                        case "WITHDRAW":
+                            {
+                                Withdraw(int.Parse(param[1]));
+                                BankWrite();
+                                break;
+                            }
+                        case "BALANCE": Balance(); break;
+
                         //case "ONLINE":
                         //    {
                         //        onlineUserek();
@@ -94,7 +192,7 @@ namespace Szerver
                             break;
                         case "LIST":
                             {
-                                Lista();
+                                List();
                             }
                             break;
                         case "BYE": w.WriteLine("BYE"); ok = false; break;
@@ -110,6 +208,67 @@ namespace Szerver
             Console.WriteLine("A kliens elköszönt");
         }
 
+        public void Deposit(int amount)
+        {
+            if (this.user == null)
+            {
+                w.WriteLine("Előbb jelentkezzen be!");
+            }
+            else
+            {
+                BankRead();
+                w.WriteLine("OK*");
+                foreach (var z in banklist)
+                {
+                    if (z.Username == this.user)
+                    {
+                        z.Money += amount;
+                    }
+                }
+                w.WriteLine("OK!");
+            }
+        }
+        public void Withdraw(int amount)
+        {
+            if (this.user == null)
+            {
+                w.WriteLine("Előbb jelentkezzen be!");
+            }
+            else
+            {
+                BankRead();
+                w.WriteLine("OK*");
+                foreach (var z in banklist)
+                {
+                    if (z.Username == this.user)
+                    {
+                        z.Money -= amount;
+                    }
+                }
+                w.WriteLine("OK!");
+            }
+        }
+
+        public void Balance()
+        {
+            if (this.user == null)
+            {
+                w.WriteLine("Előbb jelentkezzen be!");
+            }
+            else
+            {
+                BankRead();
+                //w.WriteLine("OK*");
+                foreach (var z in banklist)
+                {
+                    if (this.user == z.Username)
+                    {
+                        w.WriteLine("'" + z.Username.ToUpper() + "'" + " felhasználóhoz tartozó egyenleg: " + z.Money + "Ft.");
+                    }
+                }
+                //w.WriteLine("OK!");
+            }
+        }
         public bool Register(string nev, string jelszo)
         {
             string[] paramS;
@@ -122,7 +281,7 @@ namespace Szerver
                 paramS = line.Split('|');
                 if (nev == paramS[0])
                 {
-                    w.WriteLine("Ilyen felhasználónév már létezik, próbáld újra!"); 
+                    w.WriteLine("Ilyen felhasználónév már létezik, próbáld újra!");
                     return false;
                 }
                 i++;
@@ -174,7 +333,7 @@ namespace Szerver
         {
             string FilePath = "../../users.txt";
             var text = new StringBuilder();
-            
+
             foreach (string s in File.ReadAllLines(FilePath))
             {
                 text.AppendLine(s.Replace(nev + "|" + jelszo, ""));
@@ -187,7 +346,7 @@ namespace Szerver
             }
 
         }
-        void userLista()
+        void UserList()
         {
             string[] listam = File.ReadAllLines("../../users.txt");
             w.WriteLine("OK*");
@@ -251,7 +410,10 @@ namespace Szerver
             w.WriteLine("OK*");
             w.WriteLine("LOGIN:                      Bejelentkezés felhasználónév|jelszó formátummal!");
             w.WriteLine("LOGOUT:                     Jelenleg bejelentkezett felhasználó kijelentkeztetése!");
-            w.WriteLine("REGISTER:                   Rgisztráció felhasználónév|jelszó formátummal!");
+            w.WriteLine("REGISTER:                   Regisztráció felhasználónév|jelszó formátummal!");
+            w.WriteLine("BALANCE:                    Egyeneleg lekérése!");
+            w.WriteLine("DEPOSIT:                    Pénz feltöltése folyószámlára!");
+            w.WriteLine("WITHDRAW:                   Pénz levétele folyószámláról!");
             w.WriteLine("USERDEL:                    Felhasználók törlése felhasználónév|jelszó formátummal!(ADMIN ONLY");
             w.WriteLine("USERLIST:                   Ki listázza a felhasználókat!(ADMIN ONLY");
             w.WriteLine("HELP:                       Ki listázza a megadható parancsokat!");
@@ -259,7 +421,7 @@ namespace Szerver
             w.WriteLine("EXIT:                       Kilépés!");
             w.WriteLine("OK!");
         }
-        void Lista()
+        void List()
         {
             string[] listam = File.ReadAllLines("lista.txt");
             w.WriteLine("OK*");
