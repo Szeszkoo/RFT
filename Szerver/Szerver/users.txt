@@ -2,3 +2,5 @@ dfs|asd|1
 asd|asd|3078
 anyu|anyu|1422
 wasd|ddfdf|0
+dani|dani|4000
+david|david|5000

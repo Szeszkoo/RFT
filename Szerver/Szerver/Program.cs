@@ -78,7 +78,7 @@ namespace Szerver
         public Users(string username, int osszeg)
         {
             this.username = username;
-           // this.osszeg = osszeg;
+            // this.osszeg = osszeg;
         }
     }
     class Szamla
@@ -119,6 +119,7 @@ namespace Szerver
         List<string> online = new List<string>();
         public List<Bank> banklist = new List<Bank>();
         List<Users> Felhasznaloklista = new List<Users>();
+        bool utalas;
 
         public Protokoll(TcpClient c)
         {
@@ -140,14 +141,33 @@ namespace Szerver
             }
             reader.Close();
         }
+        public void Read_users2()
+        {
+            StreamReader reader = new StreamReader("../../users.txt");
+            while (reader.Peek() >= 0)
+            {
+                Bank m = new Bank();
+                string[] tmp = reader.ReadLine().Split('|');
+                foreach (var item in banklist)
+                {
+
+                }
+                m.Username = tmp[0];
+                m.Password = tmp[1];
+                m.Money = int.Parse(tmp[2]);
+                //banklist.
+            }
+            reader.Close();
+        }
         public void Overwrite_users() //felülírja az adott sort csak a pénz változtatva
         {
-            Read_users();
+            // Read_users();
             int i = 1;
             int lineCount = File.ReadLines("../../users.txt").Count();
             string line;
             string[] paramS;
             string[] lines = File.ReadAllLines("../../users.txt");
+            // w.WriteLine("OK*");
             while (i <= lineCount)
             {
                 line = File.ReadLines("../../users.txt").Skip(i).Take(1).First();
@@ -156,11 +176,19 @@ namespace Szerver
                 if (this.user == paramS[0] && banklist[i].Username == paramS[0])
                 {
                     lines[i] = banklist[i].Username + "|" + banklist[i].Password + "|" + banklist[i].Money;
+                    
                     File.WriteAllLines("../../users.txt", lines);
                 }
+                //if (this.user == paramS[0] && banklist[i].Username == paramS[0])
+                //{
+                //    lines[i] = banklist[i].Username + "|" + banklist[i].Password + "|" + banklist[i].Money;
+                //utalas
+                //    File.WriteAllLines("../../users.txt", lines);
+                //}
+
                 i++;
             }
-            w.WriteLine("OK");
+            //  w.WriteLine("OK!");
 
         }
 
@@ -169,6 +197,7 @@ namespace Szerver
             w.WriteLine("Aukció 1.0 béta");
             w.Flush();
             bool ok = true;
+            Read_users();
             while (ok)
             {
                 string parancs = null;
@@ -235,6 +264,8 @@ namespace Szerver
                         case "UTAL":
                             {
                                 utal(param[1], int.Parse(param[2]));
+                                Overwrite_users();
+
                             }
                             break;
                         case "SZAMLA":
@@ -264,7 +295,7 @@ namespace Szerver
                 }
                 catch (Exception e)
                 {
-                    w.WriteLine("ERR|{0}", e.Message);
+                    //  w.WriteLine("ERR|{0}", e.Message);
                 }
                 w.Flush();
             }
@@ -279,8 +310,7 @@ namespace Szerver
             }
             else
             {
-                Read_users();
-                w.WriteLine("OK*");
+                // Read_users();
                 foreach (var z in banklist)
                 {
                     if (z.Username == this.user)
@@ -288,7 +318,9 @@ namespace Szerver
                         z.Money += amount;
                     }
                 }
-                w.WriteLine("OK!");
+                w.WriteLine("Feltöltötted az egyenleged:{0} Forintal", amount);
+                // w.WriteLine("We have put up:{0} Ft ", amount);
+
             }
         }
         public void Withdraw(int amount)
@@ -299,8 +331,7 @@ namespace Szerver
             }
             else
             {
-                Read_users();
-                w.WriteLine("OK*");
+                // Read_users();
                 foreach (var z in banklist)
                 {
                     if (z.Username == this.user)
@@ -308,7 +339,7 @@ namespace Szerver
                         z.Money -= amount;
                     }
                 }
-                w.WriteLine("OK!");
+                w.WriteLine("Kivettél a számládról:{0} Forintot ", amount);
             }
         }
 
@@ -320,8 +351,8 @@ namespace Szerver
             }
             else
             {
-                Read_users();
-                //w.WriteLine("OK*");
+                //   Read_users();
+                //   w.WriteLine("OK*");
                 foreach (var z in banklist)
                 {
                     if (this.user == z.Username)
@@ -329,36 +360,38 @@ namespace Szerver
                         w.WriteLine("'" + z.Username.ToUpper() + "'" + " felhasználóhoz tartozó egyenleg: " + z.Money + "Ft.");
                     }
                 }
-                //w.WriteLine("OK!");
+                //   w.WriteLine("OK!");
             }
         }
-        public void utal(string felhasznalonak, int osszeg)
+        public void utal(string felhasznalonak, int amount)
         {
-            string FilePath = "../../szamla.txt";
-            var text = new StringBuilder();
-            Users szemely = new Users();
-            //szemely.Username = "gealo";
-            //szemely.Osszeg = 1300;
-            //foreach (var item in Felhasznaloklista)
-            //{
-            //    w.WriteLine(item);
-            //}
-            w.WriteLine(Felhasznaloklista);
-            foreach (string s in File.ReadAllLines(FilePath))
+            if (this.user == null)
             {
-                //text.AppendLine(s.Replace(felhasznalonak + "|", felhasznalonak + "|" + osszeg)); //Convert.ToString(osszeg)));
-
-                //text.AppendLine(s.Remove(6, 11));
+                w.WriteLine("Előbb jelentkezzen be!");
             }
-                szemely.Username = felhasznalonak;
-              //  szemely.Osszeg = osszeg;
-                Felhasznaloklista.Add(szemely);
-            w.WriteLine("OK");
-
-            using (var file = new StreamWriter(File.Create(FilePath)))
+            else
             {
-                file.Write(text.ToString());
+                utalas = true;
+                // Read_users();
+                foreach (var z in banklist)
+                {
+                    if (z.Username == this.user)
+                    {
+                        z.Money -= amount;
+                    }
+                }
+                foreach (var z in banklist)
+                {
+                    if (z.Username == felhasznalonak)
+                    {
+                        z.Money += amount;
+                    }
+                }
+                w.WriteLine("{0} összegű utalás megtörtént {1} nevű felhasználónak.", felhasznalonak, amount);
+                // w.WriteLine("We have put up:{0} Ft ", amount);
+
             }
+
         }
 
         public bool Register(string nev, string jelszo)
