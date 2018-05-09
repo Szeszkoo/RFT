@@ -1,7 +1,3 @@
-dfs|asd|1
-asd|asd|3078
-anyu|anyu|1422
-wasd|ddfdf|0
-dani|dani|4100
-david|david|4200
+dani|dani|1000
+david|david|7250
 admin|admin|0

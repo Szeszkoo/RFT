@@ -179,13 +179,13 @@ namespace Szerver
                             break;
                         case "DEPOSIT":
                             {
-                                Deposit(int.Parse(param[1]));
+                                Deposit(Math.Abs(int.Parse(param[1])));
                                 Overwrite_users();
                                 break;
                             }
                         case "WITHDRAW":
                             {
-                                Withdraw(int.Parse(param[1]));
+                                Withdraw(Math.Abs(int.Parse(param[1])));
                                 Overwrite_users();
                                 break;
                             }
@@ -193,7 +193,7 @@ namespace Szerver
 
                         case "TRANSFER":
                             {
-                                Transfer(param[1], int.Parse(param[2]));
+                                Transfer(param[1], Math.Abs(int.Parse(param[2])));
                                 Overwrite_users();
 
                             }
@@ -204,11 +204,7 @@ namespace Szerver
                                 Help();
                             }
                             break;
-                        case "LIST":
-                            {
-                                List();
-                            }
-                            break;
+
                         case "BYE": w.WriteLine("BYE"); ok = false; break;
                         default: w.WriteLine("ERR|Ismeretlen parancs"); break;
                     }
@@ -351,46 +347,6 @@ namespace Szerver
              return true;*/
             #endregion
         }
-        #region earlierUserdel
-        //public bool UserDelete(string nev)
-        //{
-        //if (this.user == null)
-        //{
-        //    w.WriteLine("Előbb jelentkezz be!");
-        //    return false;
-        //}
-        //else if (admin == false)
-        //{
-        //    w.WriteLine("Nincs jogosultságod ehhez!");
-        //    return false;
-        //}
-        //else
-        //{
-        //    string[] paramS;
-        //    string line = null;
-        //    int i = 1;
-        //    int lineCount = File.ReadLines("../../users.txt").Count();
-        //    while (i <= lineCount)
-        //    {
-
-        //        line = File.ReadLines("../../users.txt").Skip(i - 1).Take(1).First();
-        //        paramS = line.Split('|');
-        //        if (nev == paramS[0])
-        //        {
-        //            w2 = new StreamWriter("../../users.txt", true);
-        //            w2.WriteLine(Environment.NewLine); // itt egyenlőre mutyi van xd
-        //            w2.Flush();
-        //            w2.Close();
-        //            w.WriteLine("OK");
-        //            return true;
-        //        }
-        //        i++;
-        //    }
-        //    w.WriteLine("Ilyen felhasználó nem létezik!");
-        //    return false;
-        //}
-        //}
-        #endregion
         private void UserDelete(string nev, string jelszo)
         {
             string FilePath = "../../users.txt";
@@ -420,7 +376,6 @@ namespace Szerver
             w.WriteLine("OK!");
 
         }
-
 
         public void Login(string nev, string jelszo)
         {
@@ -462,28 +417,17 @@ namespace Szerver
         private void Help()
         {
             w.WriteLine("OK*");
-            w.WriteLine("LOGIN:                      Bejelentkezés felhasználónév|jelszó formátummal!");
+            w.WriteLine("LOGIN|user|passwd:          Bejelentkezés !");
             w.WriteLine("LOGOUT:                     Jelenleg bejelentkezett felhasználó kijelentkeztetése!");
-            w.WriteLine("REGISTER:                   Regisztráció felhasználónév|jelszó formátummal!");
+            w.WriteLine("REGISTER|user|passwd:       Regisztráció!");
             w.WriteLine("BALANCE:                    Egyeneleg lekérése!");
-            w.WriteLine("DEPOSIT:                    Pénz feltöltése folyószámlára!");
-            w.WriteLine("WITHDRAW:                   Pénz levétele folyószámláról!");
-            w.WriteLine("USERDEL:                    Felhasználók törlése felhasználónév|jelszó formátummal!(ADMIN ONLY");
+            w.WriteLine("DEPOSIT|amount:             Pénz feltöltése folyószámlára!");
+            w.WriteLine("WITHDRAW|amount:            Pénz levétele folyószámláról!");
+            w.WriteLine("TRANSFER|personName|amount  Pénz utalása folyószámláról más számára!");
+            w.WriteLine("USERDEL|user|passwd:        Felhasználók törlése!(ADMIN ONLY");
             w.WriteLine("USERLIST:                   Ki listázza a felhasználókat!(ADMIN ONLY");
             w.WriteLine("HELP:                       Ki listázza a megadható parancsokat!");
-            w.WriteLine("LIST :                      Ki listázza a motorokat!");
             w.WriteLine("EXIT:                       Kilépés!");
-            w.WriteLine("OK!");
-        }
-        void List()
-        {
-            string[] listam = File.ReadAllLines("lista.txt");
-            w.WriteLine("OK*");
-            foreach (var item in listam)
-            {
-                listam = listam[0].Split('|');
-                w.WriteLine(item);
-            }
             w.WriteLine("OK!");
         }
     }
