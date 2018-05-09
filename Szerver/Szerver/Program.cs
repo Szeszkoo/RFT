@@ -55,59 +55,7 @@ namespace Szerver
             }
         }
     }
-    class Users
-    {
-        private string username;
-        private string jelszo;
 
-        public string Jelszo
-        {
-            get { return jelszo; }
-            set { jelszo = value; }
-        }
-
-        public string Username
-        {
-            get { return username; }
-            set { username = value; }
-        }
-        public Users()
-        {
-
-        }
-        public Users(string username, int osszeg)
-        {
-            this.username = username;
-            // this.osszeg = osszeg;
-        }
-    }
-    class Szamla
-    {
-        private int osszeg;
-
-        public int Osszeg
-        {
-            get { return osszeg; }
-            set { osszeg = value; }
-        }
-        private string fioknev;
-
-        public string Fioknev
-        {
-            get { return fioknev; }
-            set { fioknev = value; }
-        }
-        public Szamla()
-        {
-
-        }
-        public Szamla(string fiokneve, int osszeg)
-        {
-            this.fioknev = fiokneve;
-            this.osszeg = osszeg;
-
-        }
-    }
     class Protokoll
     {
         public StreamReader r;
@@ -116,10 +64,9 @@ namespace Szerver
         TcpClient client = null;
         public string user = null;
         public bool admin = false;
-        List<string> online = new List<string>();
         public List<Bank> banklist = new List<Bank>();
-        List<Users> Felhasznaloklista = new List<Users>();
         bool utalas;
+        string felhasznalonak;
 
         public Protokoll(TcpClient c)
         {
@@ -141,24 +88,6 @@ namespace Szerver
             }
             reader.Close();
         }
-        public void Read_users2()
-        {
-            StreamReader reader = new StreamReader("../../users.txt");
-            while (reader.Peek() >= 0)
-            {
-                Bank m = new Bank();
-                string[] tmp = reader.ReadLine().Split('|');
-                foreach (var item in banklist)
-                {
-
-                }
-                m.Username = tmp[0];
-                m.Password = tmp[1];
-                m.Money = int.Parse(tmp[2]);
-                //banklist.
-            }
-            reader.Close();
-        }
         public void Overwrite_users() //felülírja az adott sort csak a pénz változtatva
         {
             // Read_users();
@@ -176,15 +105,16 @@ namespace Szerver
                 if (this.user == paramS[0] && banklist[i].Username == paramS[0])
                 {
                     lines[i] = banklist[i].Username + "|" + banklist[i].Password + "|" + banklist[i].Money;
-                    
+
                     File.WriteAllLines("../../users.txt", lines);
                 }
-                //if (this.user == paramS[0] && banklist[i].Username == paramS[0])
-                //{
-                //    lines[i] = banklist[i].Username + "|" + banklist[i].Password + "|" + banklist[i].Money;
-                //utalas
-                //    File.WriteAllLines("../../users.txt", lines);
-                //}
+                if (utalas == true)
+                    if (this.felhasznalonak == paramS[0] && banklist[i].Username == paramS[0])
+                    {
+                        lines[i] = banklist[i].Username + "|" + banklist[i].Password + "|" + banklist[i].Money;
+                        File.WriteAllLines("../../users.txt", lines);
+                        utalas = false;
+                    }
 
                 i++;
             }
@@ -261,23 +191,13 @@ namespace Szerver
                             }
                         case "BALANCE": Balance(); break;
 
-                        case "UTAL":
+                        case "TRANSFER":
                             {
-                                utal(param[1], int.Parse(param[2]));
+                                Transfer(param[1], int.Parse(param[2]));
                                 Overwrite_users();
 
                             }
                             break;
-                        case "SZAMLA":
-                            {
-                                Szamla();
-                            }
-                            break;
-                        //case "ONLINE":
-                        //    {
-                        //        onlineUserek();
-                        //    }
-                        //    break;
 
                         case "HELP":
                             {
@@ -295,7 +215,7 @@ namespace Szerver
                 }
                 catch (Exception e)
                 {
-                    //  w.WriteLine("ERR|{0}", e.Message);
+                    //w.WriteLine(e.Message);
                 }
                 w.Flush();
             }
@@ -363,8 +283,9 @@ namespace Szerver
                 //   w.WriteLine("OK!");
             }
         }
-        public void utal(string felhasznalonak, int amount)
+        public void Transfer(string felhasznalonak, int amount)
         {
+            this.felhasznalonak = felhasznalonak;
             if (this.user == null)
             {
                 w.WriteLine("Előbb jelentkezzen be!");
@@ -499,26 +420,7 @@ namespace Szerver
             w.WriteLine("OK!");
 
         }
-        void Szamla()
-        {
-            string[] listam = File.ReadAllLines("../../szamla.txt");
-            w.WriteLine("OK*");
-            foreach (var item in listam)
-            {
-                listam = listam[0].Split('|');
-                w.WriteLine(item);
-            }
-            w.WriteLine("OK!");
-        }
-        //void onlineUserek()
-        //{
-        //    w.WriteLine("OK*");
-        //    foreach (var item in online)
-        //    {
-        //        w.WriteLine("online: " + item);
-        //    }
-        //    w.WriteLine("OK!");
-        //}
+
 
         public void Login(string nev, string jelszo)
         {
