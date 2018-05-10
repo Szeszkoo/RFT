@@ -66,7 +66,7 @@ namespace Szerver
         public bool admin = false;
         public List<Bank> banklist = new List<Bank>();
         bool utalas;
-        string felhasznalonak;
+        string personName;
         bool borrow;
 
         public Protokoll(TcpClient c)
@@ -105,7 +105,7 @@ namespace Szerver
 
                 //Utalás esetén feltölti a felhasználónak
                 if (utalas == true)
-                    if (this.felhasznalonak == paramS[0] && banklist[i].Username == paramS[0])
+                    if (this.personName == paramS[0] && banklist[i].Username == paramS[0])
                     {
                         lines[i] = banklist[i].Username + "|" + banklist[i].Password + "|" + banklist[i].Money;
                         File.WriteAllLines("../../users.txt", lines);
@@ -214,7 +214,12 @@ namespace Szerver
 
                             }
                             break;
-
+                        case "FS":
+                            {
+                                Savings(Math.Abs(int.Parse(param[1])), Math.Abs(int.Parse(param[2])));
+                                Overwrite_users();
+                            }
+                            break;
                         case "HELP":
                             {
                                 Help();
@@ -295,9 +300,9 @@ namespace Szerver
                 //   w.WriteLine("OK!");
             }
         }
-        public void Transfer(string felhasznalonak, int amount)
+        public void Transfer(string personName, int amount)
         {
-            this.felhasznalonak = felhasznalonak;
+            this.personName = personName;
             if (this.user == null)
             {
                 w.WriteLine("Előbb jelentkezzen be!");
@@ -315,12 +320,12 @@ namespace Szerver
                 }
                 foreach (var z in banklist)
                 {
-                    if (z.Username == felhasznalonak)
+                    if (z.Username == personName)
                     {
                         z.Money += amount;
                     }
                 }
-                w.WriteLine("{0} összegű utalás megtörtént {1} nevű felhasználónak.", felhasznalonak, amount);
+                w.WriteLine("{0} összegű utalás megtörtént {1} nevű felhasználónak.", personName, amount);
                 // w.WriteLine("We have put up:{0} Ft ", amount);
 
             }
@@ -362,15 +367,42 @@ namespace Szerver
                 w.WriteLine("A bank nem adhat most kölcsönt");
 
         }
+        public void Savings(int amount, int month)
+        {
+            if (this.user == null)
+            {
+                w.WriteLine("Előbb jelentkezzen be!");
+            }
+            else
+            {
+                amount = amount * month / 10;
+                foreach (var z in banklist)
+                {
+                    if (z.Username == this.user)
+                    {
+                        z.Money += amount;
+                    }
+                }
+                //w.WriteLine("OK*");
+                //for (int i = 0; i < month; i++)
+                //{
+                //    w.WriteLine(i);
+                //    w.WriteLine("OK!");
+                //}
+                w.WriteLine("Az egyenleged emelkedett:{0} Forintal", amount);
+                // w.WriteLine("We have put up:{0} Ft ", amount);
 
-        public bool Register(string nev, string jelszo)
+            }
+        }
+
+        public bool Register(string name, string jelszo)
         {
             Read_users();
             int i = 1;
             int lineCount = File.ReadLines("../../users.txt").Count();
             while (i <= lineCount)
             {
-                if (banklist[i].Username == nev)
+                if (banklist[i].Username == name)
                 {
                     w.WriteLine("Ilyen felhasználónév már létezik, próbáld újra!");
                     return false;
@@ -379,26 +411,8 @@ namespace Szerver
             }
             w.WriteLine("OK");
             return true;
-            #region old_register
-            /* string[] paramS;
-             string line;
-             int i = 1;
-             int lineCount = File.ReadLines("../../users.txt").Count();
-             while (i <= lineCount)
-             {
-                 line = File.ReadLines("../../users.txt").Skip(i - 1).Take(1).First();
-                 paramS = line.Split('|');
-                 if (nev == paramS[0])
-                 {
-                     w.WriteLine("Ilyen felhasználónév már létezik, próbáld újra!");
-                     return false;
-                 }
-                 i++;
-             }
-             w.WriteLine("OK");
-             return true;*/
-            #endregion
         }
+
         private void UserDelete(string nev, string jelszo)
         {
             string FilePath = "../../users.txt";

@@ -1,5 +1,5 @@
-bank|rgr|401
-dani|dani|370
+bank|rgr|400
+dani|dani|326
 david|david|7250
 admin|admin|0
 a|a|99
