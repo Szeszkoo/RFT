@@ -67,6 +67,7 @@ namespace Szerver
         public List<Bank> banklist = new List<Bank>();
         bool utalas;
         string felhasznalonak;
+        bool borrow;
 
         public Protokoll(TcpClient c)
         {
@@ -91,23 +92,18 @@ namespace Szerver
         public void Overwrite_users() //felülírja az adott sort csak a pénz változtatva
         {
             // Read_users();
-            int i = 1;
+            int i = 0;
             int lineCount = File.ReadLines("../../users.txt").Count();
             string line;
             string[] paramS;
             string[] lines = File.ReadAllLines("../../users.txt");
             // w.WriteLine("OK*");
-            while (i <= lineCount)
+            while (i < lineCount)
             {
                 line = File.ReadLines("../../users.txt").Skip(i).Take(1).First();
                 paramS = line.Split('|');
 
-                if (this.user == paramS[0] && banklist[i].Username == paramS[0])
-                {
-                    lines[i] = banklist[i].Username + "|" + banklist[i].Password + "|" + banklist[i].Money;
-
-                    File.WriteAllLines("../../users.txt", lines);
-                }
+                //Utalás esetén feltölti a felhasználónak
                 if (utalas == true)
                     if (this.felhasznalonak == paramS[0] && banklist[i].Username == paramS[0])
                     {
@@ -115,7 +111,20 @@ namespace Szerver
                         File.WriteAllLines("../../users.txt", lines);
                         utalas = false;
                     }
+                //Ha kölcsönről van szó a banktól vonja ke
+                if (borrow == true && banklist[i].Username == "bank")
+                {
+                    lines[0] = banklist[i].Username + "|" + banklist[i].Password + "|" + banklist[i].Money;
+                    File.WriteAllLines("../../users.txt", lines);
+                    borrow = false;
+                }
 
+                if (this.user == paramS[0] && banklist[i].Username == paramS[0])
+                {
+                    lines[i] = banklist[i].Username + "|" + banklist[i].Password + "|" + banklist[i].Money;
+
+                    File.WriteAllLines("../../users.txt", lines);
+                }
                 i++;
             }
             //  w.WriteLine("OK!");
@@ -194,6 +203,13 @@ namespace Szerver
                         case "TRANSFER":
                             {
                                 Transfer(param[1], Math.Abs(int.Parse(param[2])));
+                                Overwrite_users();
+
+                            }
+                            break;
+                        case "BORROW":
+                            {
+                                Borrow(Math.Abs(int.Parse(param[1])));
                                 Overwrite_users();
 
                             }
@@ -310,6 +326,42 @@ namespace Szerver
             }
 
         }
+        public void Borrow(int amount)
+        {
+            bool siker = false;
+            if (this.user == null)
+            {
+                w.WriteLine("Előbb jelentkezzen be!");
+            }
+            else
+            {
+                foreach (var z in banklist)
+                {
+                    if (z.Username == "bank" && z.Money > 0 && z.Money - amount > 0)
+                    {
+                        borrow = true;
+
+                        z.Money -= amount;
+                        foreach (var k in banklist)
+                        {
+
+                            if (k.Username == this.user)
+                            {
+                                k.Money += amount;
+                                siker = true;
+                            }
+                        }
+                    }
+
+                }
+
+            }
+            if (siker == true)
+                w.WriteLine("A kölcsön értéke:{0}Ft", amount);
+            else
+                w.WriteLine("A bank nem adhat most kölcsönt");
+
+        }
 
         public bool Register(string nev, string jelszo)
         {
@@ -424,6 +476,7 @@ namespace Szerver
             w.WriteLine("DEPOSIT|amount:             Pénz feltöltése folyószámlára!");
             w.WriteLine("WITHDRAW|amount:            Pénz levétele folyószámláról!");
             w.WriteLine("TRANSFER|personName|amount  Pénz utalása folyószámláról más számára!");
+            w.WriteLine("BORROW|amount               Kölcsön kérése a banktól ha lehetséges!");
             w.WriteLine("USERDEL|user|passwd:        Felhasználók törlése!(ADMIN ONLY");
             w.WriteLine("USERLIST:                   Ki listázza a felhasználókat!(ADMIN ONLY");
             w.WriteLine("HELP:                       Ki listázza a megadható parancsokat!");
