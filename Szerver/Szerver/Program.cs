@@ -415,14 +415,14 @@ namespace Szerver
             return true;
         }
 
-        private void UserDelete(string nev, string jelszo)
+        private void UserDelete(string name, string jelszo)
         {
             string FilePath = "../../users.txt";
             var text = new StringBuilder();
 
             foreach (string s in File.ReadAllLines(FilePath))
             {
-                text.AppendLine(s.Replace(nev + "|" + jelszo, ""));
+                text.AppendLine(s.Replace(name + "|" + jelszo, ""));
             }
             w.WriteLine("OK");
 
@@ -445,23 +445,23 @@ namespace Szerver
 
         }
 
-        public void Login(string nev, string jelszo)
+        public void Login(string name, string jelszo)
         {
             if (this.user != null)
             {
                 w.WriteLine("You must login first!");
 
             }
-            else if (nev == "admin")
+            else if (name == "admin")
             {
                 admin = true;
-                this.user = nev;
+                this.user = name;
                 w.WriteLine("Welcome here,admin");
             }
             else
             {
-                //online.Add(nev);
-                this.user = nev;
+                //online.Add(name);
+                this.user = name;
                 w.WriteLine("OK");
             }
         }
