@@ -67,6 +67,8 @@ namespace Szerver
         public List<Bank> banklist = new List<Bank>();
         bool transfer;
         string personName;
+        bool utalas;
+        string receiver;
         bool borrow;
 
         public Protokoll(TcpClient c)
@@ -106,6 +108,8 @@ namespace Szerver
                 //Utalás esetén feltölti a felhasználónak
                 if (transfer == true)
                     if (this.personName == paramS[0] && banklist[i].Username == paramS[0])
+                if (utalas == true)
+                    if (this.receiver == paramS[0] && banklist[i].Username == paramS[0])
                     {
                         lines[i] = banklist[i].Username + "|" + banklist[i].Password + "|" + banklist[i].Money;
                         File.WriteAllLines("../../users.txt", lines);
@@ -130,6 +134,66 @@ namespace Szerver
             //  w.WriteLine("OK!");
 
         }
+        public void Create_file(string nev)
+        {
+            string path = @"../../" + nev + ".txt";
+            if (!File.Exists(path))
+            {
+                File.CreateText(path);
+            }
+        }
+        public void Unique_user_write(string nev, string data, string person_name, string task)
+        {
+            string path = @"../../" + nev + ".txt";
+            StreamWriter writer = new StreamWriter(path, true);
+            string content = "";
+
+            foreach (var z in banklist)
+            {
+                if (z.Username == nev)
+                {
+                    switch (task)
+                    {
+                        case "DEPOSIT":
+                            {
+                                content = DateTime.Now + "     Deposited: +" + data + "Ft." + "               New Balance: " + z.Money + "Ft.";
+                                writer.WriteLine(content);
+                                writer.Flush();
+                                writer.Close();
+                                content = "";
+                            }
+                            break;
+                        case "WITHDRAW":
+                            {
+                                content = DateTime.Now + "     Withdraw: -" + data + "Ft." + "               New Balance: " + z.Money + "Ft.";
+                                writer.WriteLine(content);
+                                writer.Flush();
+                                writer.Close();
+                                content = "";
+                            }
+                            break;
+                        case "TRANSFER":
+                            {
+                                content = DateTime.Now + "     Transfered: " + data + "Ft." + "    To: " + person_name + "              New Balance: " + z.Money + "Ft.";
+                                writer.WriteLine(content);
+                                writer.Flush();
+                                writer.Close();
+                                content = "";
+                            }
+                            break;
+                        case "BORROW":
+                            {
+                                content = DateTime.Now + "     Borrowed: " + data + "Ft." + "      From: BANK" + "             New Balance: " + z.Money + "Ft.";
+                                writer.WriteLine(content);
+                                writer.Flush();
+                                writer.Close();
+                                content = "";
+                            }
+                            break;
+                    }
+                }
+            }
+        }
 
         public void StartKomm()
         {
@@ -148,11 +212,12 @@ namespace Szerver
                     switch (order)
                     {
                         //függvények érkeznek majd ide
+                        //érkezett azóta pár hehe
                         case "LOGIN":
                             {
                                 Login(param[1], param[2]);
-                                break;
                             }
+                            break;
                         case "LOGOUT": Logout(); break;
                         case "REGISTER":
                             {
@@ -173,7 +238,6 @@ namespace Szerver
                                 {
                                     w.WriteLine("You can't add you are not an admin");
                                 }
-
                             }
                             break;
                         case "USERLIST":
@@ -190,21 +254,22 @@ namespace Szerver
                             {
                                 Deposit(Math.Abs(int.Parse(param[1])));
                                 Overwrite_users();
-                                break;
+                                Unique_user_write(this.user, param[1], null, "DEPOSIT");
                             }
+                            break;
                         case "WITHDRAW":
                             {
                                 Withdraw(Math.Abs(int.Parse(param[1])));
                                 Overwrite_users();
-                                break;
+                                Unique_user_write(this.user, param[1], null, "WITHDRAW");
                             }
-                        case "BALANCE": Balance(); break;
+                            break;
 
                         case "TRANSFER":
                             {
                                 Transfer(param[1], Math.Abs(int.Parse(param[2])));
                                 Overwrite_users();
-
+                                Unique_user_write(this.user, param[2], param[1], "TRANSFER");
                             }
                             break;
                         case "BORROW":
@@ -223,22 +288,43 @@ namespace Szerver
                         case "HELP":
                             {
                                 Help();
+                                Unique_user_write(this.user, param[1], null, "BORROW");
                             }
                             break;
 
+                        case "BALANCE": Balance(); break;
+                        case "HISTORY": History(); break;
                         case "BYE": w.WriteLine("BYE"); ok = false; break;
                         default: w.WriteLine("ERR|Ismeretlen order"); break;
                     }
                 }
                 catch (Exception e)
                 {
-                    //w.WriteLine(e.Message);
+                    w.WriteLine(e.Message);
                 }
                 w.Flush();
             }
             Console.WriteLine("A Client has left");
         }
 
+        public void History()
+        {
+            if (this.user == null)
+            {
+                w.WriteLine("Előbb jelentkezzen be!");
+            }
+            else
+            {
+                string path = @"../../" + this.user + ".txt";
+                string[] content = File.ReadAllLines(path);
+                w.WriteLine("OK*");
+                foreach (var z in content)
+                {
+                    w.WriteLine(z);
+                }
+                w.WriteLine("OK!");
+            }
+        }
         public void Deposit(int amount)
         {
             if (this.user == null)
@@ -299,9 +385,10 @@ namespace Szerver
                 //   w.WriteLine("OK!");
             }
         }
-        public void Transfer(string personName, int amount)
+       
+        public void Transfer(string receiverr, int amount)
         {
-            this.personName = personName;
+            this.receiver = receiverr;
             if (this.user == null)
             {
                 w.WriteLine("You must login first!");
@@ -321,11 +408,13 @@ namespace Szerver
                 foreach (var z in banklist)
                 {
                     if (z.Username == personName)
+                    if (z.Username == this.receiver)
                     {
                         z.Money += amount;
                     }
                 }
                 w.WriteLine("We transferred:{0}Ft for {1}.", personName, amount);
+                w.WriteLine("{0} összegű utalás megtörtént {1} nevű felhasználónak.", amount, this.receiver);
                 // w.WriteLine("We have put up:{0} Ft ", amount);
 
             }
@@ -494,6 +583,7 @@ namespace Szerver
             w.WriteLine("WITHDRAW|amount:            Pénz levétele folyószámláról!");
             w.WriteLine("TRANSFER|personName|amount  Pénz utalása folyószámláról más számára!");
             w.WriteLine("BORROW|amount               Kölcsön kérése a banktól ha lehetséges!");
+            w.WriteLine("HISTORY                     SZámlatörténet megtekintése!");
             w.WriteLine("USERDEL|user|passwd:        Felhasználók törlése!(ADMIN ONLY");
             w.WriteLine("USERLIST:                   Ki listázza a felhasználókat!(ADMIN ONLY");
             w.WriteLine("HELP:                       Ki listázza a megadható orderokat!");

@@ -16,7 +16,6 @@ namespace Kliens
             TcpClient csatl = null;
             StreamReader r = null;
             StreamWriter w = null;
-            string udv = "";
             try
             {
                 string ipcim = "127.0.0.1"; int portszam = 1234;
@@ -24,16 +23,16 @@ namespace Kliens
                 csatl = new TcpClient(ipcim, portszam);
                 r = new StreamReader(csatl.GetStream());
                 w = new StreamWriter(csatl.GetStream());
-                Console.WriteLine("Csatl. ok");
-
+                Console.WriteLine("Connection established.");
+                Console.WriteLine("Welcome in FRASZKÓ BANK Zrt. Netbank.");
+                Console.WriteLine("If you are first time on our site, you can use the HELP command to get started.");
+                Console.WriteLine();
             }
             catch
             {
                 csatl = null;
             }
 
-            //kezdődik!:-)))
-            udv = r.ReadLine();
             bool bye = false;
             while (!bye)
             {
