@@ -138,15 +138,15 @@ namespace Szerver
                 File.CreateText(path);
             }
         }
-        public void Unique_user_write(string nev, string data, string person_name, string task)
+        public void Unique_user_write(string name, string data, string person_name, string task)
         {
-            string path = @"../../" + nev + ".txt";
+            string path = @"../../" + name + ".txt";
             StreamWriter writer = new StreamWriter(path, true);
             string content = "";
 
             foreach (var z in banklist)
             {
-                if (z.Username == nev)
+                if (z.Username == name)
                 {
                     switch (task)
                     {
@@ -190,20 +190,21 @@ namespace Szerver
                 }
             }
         }
+       
 
-        public void StartKomm()
+        public void Start_Communication()
         {
             bool ok = true;
             Read_users();
             while (ok)
             {
-                string parancs = null;
+                string command = null;
                 try
                 {
-                    string uzenet = r.ReadLine();
-                    string[] param = uzenet.Split('|');
-                    parancs = param[0].ToUpper();
-                    switch (parancs)
+                    string message = r.ReadLine();
+                    string[] param = message.Split('|');
+                    command = param[0].ToUpper();
+                    switch (command)
                     {
                         //függvények érkeznek majd ide
                         //érkezett azóta pár hehe
@@ -230,7 +231,7 @@ namespace Szerver
                                     UserDelete(param[1], param[2]);
                                 else
                                 {
-                                    w.WriteLine("Te nem adhatsz hozzá nem vagy admin");
+                                    w.WriteLine("Admin only function!");
                                 }
                             }
                             break;
@@ -240,7 +241,7 @@ namespace Szerver
                                     UserList();
                                 else
                                 {
-                                    w.WriteLine("Te nem kérheted le ezt nem vagy admin");
+                                    w.WriteLine("Admin only function!");
                                 }
                             }
                             break;
@@ -284,7 +285,7 @@ namespace Szerver
                         case "HISTORY": History(); break;
                         case "HELP": Help(); break;
                         case "BYE": w.WriteLine("BYE"); ok = false; break;
-                        default: w.WriteLine("ERR|Ismeretlen parancs"); break;
+                        default: w.WriteLine("ERR|Unkown command!"); break;
                     }
                 }
                 catch (Exception e)
@@ -293,14 +294,14 @@ namespace Szerver
                 }
                 w.Flush();
             }
-            Console.WriteLine("A kliens elköszönt");
+            Console.WriteLine("The client said goodbye!");
         }
 
         public void History()
         {
             if (this.user == null)
             {
-                w.WriteLine("Előbb jelentkezzen be!");
+                w.WriteLine("You have to log in first!");
             }
             else
             {
@@ -318,7 +319,7 @@ namespace Szerver
         {
             if (this.user == null)
             {
-                w.WriteLine("Előbb jelentkezzen be!");
+                w.WriteLine("You have to log in first!");
             }
             else
             {
@@ -330,16 +331,15 @@ namespace Szerver
                         z.Money += amount;
                     }
                 }
-                w.WriteLine("Feltöltötted az egyenleged:{0} Forintal", amount);
+                w.WriteLine("You have been deposited:{0} Ft.", amount);
                 // w.WriteLine("We have put up:{0} Ft ", amount);
-
             }
         }
         public void Withdraw(int amount)
         {
             if (this.user == null)
             {
-                w.WriteLine("Előbb jelentkezzen be!");
+                w.WriteLine("You have to log in first!");
             }
             else
             {
@@ -351,7 +351,7 @@ namespace Szerver
                         z.Money -= amount;
                     }
                 }
-                w.WriteLine("Kivettél a számládról:{0} Forintot ", amount);
+                w.WriteLine("You have been witdraw:{0} Ft. ", amount);
             }
         }
 
@@ -359,17 +359,16 @@ namespace Szerver
         {
             if (this.user == null)
             {
-                w.WriteLine("Előbb jelentkezzen be!");
+                w.WriteLine("You have to log in first!");
             }
             else
             {
                 //   Read_users();
-                //   w.WriteLine("OK*");
                 foreach (var z in banklist)
                 {
                     if (this.user == z.Username)
                     {
-                        w.WriteLine("'" + z.Username.ToUpper() + "'" + " felhasználóhoz tartozó egyenleg: " + z.Money + "Ft.");
+                        w.WriteLine("'" + z.Username.ToUpper() + "'" + " user's balance: " + z.Money + "Ft.");
                     }
                 }
                 //   w.WriteLine("OK!");
@@ -380,7 +379,7 @@ namespace Szerver
             this.receiver = receiverr;
             if (this.user == null)
             {
-                w.WriteLine("Előbb jelentkezzen be!");
+                w.WriteLine("You have to log in first!");
             }
             else
             {
@@ -411,7 +410,7 @@ namespace Szerver
             bool siker = false;
             if (this.user == null)
             {
-                w.WriteLine("Előbb jelentkezzen be!");
+                w.WriteLine("You have to log in first!");
             }
             else
             {
@@ -446,8 +445,7 @@ namespace Szerver
         {
             if (this.user == null)
             {
-                w.WriteLine("You must login first!");
-
+                w.WriteLine("You have to log in first!");
             }
             else
             {
@@ -470,16 +468,16 @@ namespace Szerver
 
             }
         }
-        public bool Register(string nev, string jelszo)
+        public bool Register(string name, string pw)
         {
             Read_users();
             int i = 1;
             int lineCount = File.ReadLines("../../users.txt").Count();
             while (i <= lineCount)
             {
-                if (banklist[i].Username == nev)
+                if (banklist[i].Username == name)
                 {
-                    w.WriteLine("Ilyen felhasználónév már létezik, próbáld újra!");
+                    w.WriteLine("This username is already taken! ");
                     return false;
                 }
                 i++;
@@ -506,14 +504,14 @@ namespace Szerver
              return true;*/
             #endregion
         }
-        private void UserDelete(string nev, string jelszo)
+        private void UserDelete(string name, string pw)
         {
             string FilePath = "../../users.txt";
             var text = new StringBuilder();
 
             foreach (string s in File.ReadAllLines(FilePath))
             {
-                text.AppendLine(s.Replace(nev + "|" + jelszo, ""));
+                text.AppendLine(s.Replace(name + "|" + pw, ""));
             }
             w.WriteLine("OK");
 
@@ -525,53 +523,55 @@ namespace Szerver
         }
         void UserList()
         {
-            string[] listam = File.ReadAllLines("../../users.txt");
+            string[] list = File.ReadAllLines("../../users.txt");
             w.WriteLine("OK*");
-            foreach (var item in listam)
+            foreach (var item in list)
             {
-                listam = listam[0].Split('|');
+                list = list[0].Split('|');
                 w.WriteLine(item);
             }
             w.WriteLine("OK!");
 
         }
 
-        public void Login(string nev, string jelszo)
+        public void Login(string name, string pw)
         {
             if (this.user != null)
             {
-                w.WriteLine("Előbb jelentkezzen ki!");
+                w.WriteLine("You have to log out first!");
             }
-            else if (nev == "admin")
+            else if (this.user == name)
+            {
+                w.WriteLine("This user is already logged in!");
+            }
+            else if (name == "admin" && pw == "admin")
             {
                 admin = true;
-                this.user = nev;
-                w.WriteLine("Üdvözlünk a kormánynál,admin");
+                this.user = name;
+                w.WriteLine("Welcome Admin!");
             }
             else
             {
                 //online.Add(nev);
-                this.user = nev;
+                this.user = name;
                 w.WriteLine("OK");
             }
         }
         public void Logout()
         {
-            if (this.user == null)
-            {
-                w.WriteLine("Nincs bejelentkezve senki!");
-            }
             if (user == "admin")
             {
                 admin = false;
                 this.user = null;
-                w.WriteLine("Sikeres kijelentkezés,adminom!");
+                w.WriteLine("Admin logout succesfull!");
             }
             else
             {
                 this.user = null;
-                w.WriteLine("Sikeres kijelentkezés!");
+                w.WriteLine("You have been logged out successfully!");
             }
+            if (!Is_Logged()) { }
+
         }
         private void Help()
         {
@@ -595,29 +595,30 @@ namespace Szerver
 
     class Program
     {
-        const int portSzam = 1234;
-        const string ipcim = "127.0.0.1";
+        const int port_num = 1234;
+        const string ip_add = "127.0.0.1";
 
         static void Main(string[] args)
         {
 
-            Console.WriteLine("Szerver elindult");
+            Console.WriteLine("Server started!");
             try
             {
-                IPAddress ip = IPAddress.Parse(ipcim);
-                TcpListener k = new TcpListener(ip, portSzam);
+                IPAddress ip = IPAddress.Parse(ip_add);
+                TcpListener k = new TcpListener(ip, port_num);
                 k.Start();
                 while (true)
                 {
-                    Console.WriteLine("A szerver bejövő kapcsolatra vár");
+                    Console.WriteLine("Server is waiting for an incominc connection!");
                     TcpClient client = k.AcceptTcpClient();
-                    Console.WriteLine("Érkezett egy kliens!");
+                    Console.WriteLine("A client has arrived!");
                     Protokoll p = new Protokoll(client);
-                    Thread t = new Thread(p.StartKomm);
+                    Thread t = new Thread(p.Start_Communication);
                     t.Start();
+                    //t.Join();
                 }
             }
-            catch { Console.WriteLine("Nem indult el"); }
+            catch { Console.WriteLine("Could not start!"); }
             Console.ReadLine();
         }
     }

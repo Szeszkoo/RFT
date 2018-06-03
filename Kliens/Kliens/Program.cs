@@ -14,16 +14,16 @@ namespace Kliens
     {
         static void Main(string[] args)
         {
-            TcpClient csatl = null;
+            TcpClient conn = null;
             StreamReader r = null;
             StreamWriter w = null;
             try
             {
-                string ipcim = "127.0.0.1"; int portszam = 1234;
-                IPAddress ip = IPAddress.Parse(ipcim);
-                csatl = new TcpClient(ipcim, portszam);
-                r = new StreamReader(csatl.GetStream());
-                w = new StreamWriter(csatl.GetStream());
+                string ip_add = "127.0.0.1"; int port_num = 1234;
+                IPAddress ip = IPAddress.Parse(ip_add);
+                conn = new TcpClient(ip_add, port_num);
+                r = new StreamReader(conn.GetStream());
+                w = new StreamWriter(conn.GetStream());
                 Console.WriteLine("Connection established.");
                 Console.WriteLine("Welcome in FRASZKÓ BANK Zrt. Netbank.");
                 Console.WriteLine("If you are first time on our site, you can use the HELP command to get started.");
@@ -31,33 +31,33 @@ namespace Kliens
             }
             catch
             {
-                csatl = null;
+                conn = null;
             }
 
             bool bye = false;
             while (!bye)
             {
-                Console.WriteLine("Kérem a parancsot!");
-                string parancs = Console.ReadLine();
-                w.WriteLine(parancs); w.Flush();
-                string valasz = r.ReadLine();
-                if (valasz == "BYE")
+                Console.WriteLine("Waiting for next command...!");
+                string command = Console.ReadLine();
+                w.WriteLine(command); w.Flush();
+                string response = r.ReadLine();
+                if (response == "BYE")
                     bye = true;
-                if (valasz == "OK" || valasz.Substring(0, 2) == "ERR")
+                if (response == "OK" || response.Substring(0, 2) == "ERR")
                 {
-                    Console.WriteLine(valasz);
+                    Console.WriteLine(response);
                 }
-                else if (valasz == "OK*")
+                else if (response == "OK*")
                 {
-                    while (valasz != "OK!")
+                    while (response != "OK!")
                     {
-                        valasz = r.ReadLine();
-                        Console.WriteLine(valasz);
+                        response = r.ReadLine();
+                        Console.WriteLine(response);
                     }
                 }
 
                 else
-                    Console.WriteLine(valasz);
+                    Console.WriteLine(response);
             }
         }
     }
