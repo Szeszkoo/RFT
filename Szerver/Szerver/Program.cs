@@ -190,7 +190,7 @@ namespace Szerver
                 }
             }
         }
-       
+
 
         public void Start_Communication()
         {
@@ -222,6 +222,7 @@ namespace Szerver
                                     w2.WriteLine("{0}|{1}|0", param[1], param[2]);
                                     w2.Flush();
                                     w2.Close();
+                                    Read_users();
                                 }
                                 break;
                             }
@@ -284,6 +285,20 @@ namespace Szerver
                         case "BALANCE": Balance(); break;
                         case "HISTORY": History(); break;
                         case "HELP": Help(); break;
+                        case "ADMINHELP":
+                            {
+                                if (admin == true)
+                                {
+                                    Admin_Help();
+                                    break;
+
+                                }
+                                else
+                                {
+                                    w.WriteLine("You are not an admin!");
+                                    break;
+                                }
+                            }
                         case "BYE": w.WriteLine("BYE"); ok = false; break;
                         default: w.WriteLine("ERR|Unkown command!"); break;
                     }
@@ -559,7 +574,11 @@ namespace Szerver
         }
         public void Logout()
         {
-            if (user == "admin")
+            if (user == null)
+            {
+                w.WriteLine("There's none logged in!");
+            }
+            else if (user == "admin")
             {
                 admin = false;
                 this.user = null;
@@ -570,25 +589,41 @@ namespace Szerver
                 this.user = null;
                 w.WriteLine("You have been logged out successfully!");
             }
-            if (!Is_Logged()) { }
 
         }
         private void Help()
         {
             w.WriteLine("OK*");
-            w.WriteLine("LOGIN|user|passwd:          Bejelentkezés !");
-            w.WriteLine("LOGOUT:                     Jelenleg bejelentkezett felhasználó kijelentkeztetése!");
-            w.WriteLine("REGISTER|user|passwd:       Regisztráció!");
-            w.WriteLine("BALANCE:                    Egyeneleg lekérése!");
-            w.WriteLine("DEPOSIT|amount:             Pénz feltöltése folyószámlára!");
-            w.WriteLine("WITHDRAW|amount:            Pénz levétele folyószámláról!");
-            w.WriteLine("TRANSFER|personName|amount  Pénz utalása folyószámláról más számára!");
-            w.WriteLine("BORROW|amount               Kölcsön kérése a banktól ha lehetséges!");
-            w.WriteLine("HISTORY                     SZámlatörténet megtekintése!");
-            w.WriteLine("USERDEL|user|passwd:        Felhasználók törlése!(ADMIN ONLY");
-            w.WriteLine("USERLIST:                   Ki listázza a felhasználókat!(ADMIN ONLY");
-            w.WriteLine("HELP:                       Ki listázza a megadható parancsokat!");
-            w.WriteLine("EXIT:                       Kilépés!");
+            w.WriteLine("LOGIN|user|passwd:          Log in!");
+            w.WriteLine("LOGOUT:                     Log out!");
+            w.WriteLine("REGISTER|user|passwd:       Registration!");
+            w.WriteLine("BALANCE:                    Balance status!");
+            w.WriteLine("DEPOSIT|amount:             Deposit to the account!!");
+            w.WriteLine("WITHDRAW|amount:            Withdraw from the account!");
+            w.WriteLine("TRANSFER|personName|amount  Transfer money to other accounts!");
+            w.WriteLine("BORROW|amount               Take a loan if possible!");
+            w.WriteLine("HISTORY                     Account history!");
+            w.WriteLine("HELP:                       List out the commands!");
+            w.WriteLine("BYE:                        Quit the program!");
+            w.WriteLine("OK!");
+        }
+        private void Admin_Help()
+        {
+
+            w.WriteLine("OK*");
+            w.WriteLine("LOGIN|user|passwd:          Log in!");
+            w.WriteLine("LOGOUT:                     Log out!");
+            w.WriteLine("REGISTER|user|passwd:       Registration!");
+            w.WriteLine("BALANCE:                    Balance status!");
+            w.WriteLine("DEPOSIT|amount:             Deposit to the account!!");
+            w.WriteLine("WITHDRAW|amount:            Withdraw from the account!");
+            w.WriteLine("TRANSFER|personName|amount  Transfer money to other accounts!");
+            w.WriteLine("BORROW|amount               Take a loan if possible!");
+            w.WriteLine("HISTORY                     Account history!");
+            w.WriteLine("USERDEL|user|passwd:        Usere delete!(ADMIN ONLY");
+            w.WriteLine("USERLIST:                   List out the users!(ADMIN ONLY");
+            w.WriteLine("HELP:                       List out the commands!");
+            w.WriteLine("BYE:                        Quit the program!");
             w.WriteLine("OK!");
         }
     }

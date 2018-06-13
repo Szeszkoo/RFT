@@ -1,3 +1,0 @@
-abc|yamaha|100|200
-cde|suzuki|500|150
-yxc|bmw|0|1000
